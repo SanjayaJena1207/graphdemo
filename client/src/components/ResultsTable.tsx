@@ -14,11 +14,38 @@ export function formatCell(value: unknown): string {
   return String(value);
 }
 
+/** Column alias to a readable header: "signupSpreadDays" -> "Signup spread days". */
+function humanize(column: string): string {
+  const words = column
+    .replace(/AtoB$/, ' A→B')
+    .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/a→b$/, 'A→B');
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 function compare(a: unknown, b: unknown): number {
   if (a === null || a === undefined) return 1; // empty values last
   if (b === null || b === undefined) return -1;
   if (typeof a === 'number' && typeof b === 'number') return a - b;
   return formatCell(a).localeCompare(formatCell(b), undefined, { numeric: true });
+}
+
+function Cell({ value }: { value: unknown }) {
+  // Lists (ring members, order items, "because of" names) read better as chips.
+  if (Array.isArray(value) && value.length > 0) {
+    return (
+      <div className="cell-chips">
+        {value.map((v, i) => (
+          <span key={i} className="cell-chip">
+            {formatCell(v)}
+          </span>
+        ))}
+      </div>
+    );
+  }
+  return <>{formatCell(value)}</>;
 }
 
 export default function ResultsTable({ columns, rows }: Props) {
@@ -34,7 +61,11 @@ export default function ResultsTable({ columns, rows }: Props) {
     setSort((s) => (s?.column === column ? { column, asc: !s.asc } : { column, asc: true }));
 
   if (rows.length === 0) {
-    return <div className="empty small">The query ran but returned no rows.</div>;
+    return (
+      <div className="empty-inline">
+        The query ran but returned <strong>no rows</strong>.
+      </div>
+    );
   }
 
   return (
@@ -44,9 +75,9 @@ export default function ResultsTable({ columns, rows }: Props) {
           <tr>
             {columns.map((c) => (
               <th key={c} aria-sort={sort?.column === c ? (sort.asc ? 'ascending' : 'descending') : 'none'}>
-                <button onClick={() => toggleSort(c)}>
-                  {c}
-                  <span className="sort-mark">{sort?.column === c ? (sort.asc ? '▲' : '▼') : ''}</span>
+                <button onClick={() => toggleSort(c)} className={sort?.column === c ? 'sorted' : ''} title={c}>
+                  {humanize(c)}
+                  <span className="sort-mark">{sort?.column === c ? (sort.asc ? '↑' : '↓') : '↕'}</span>
                 </button>
               </th>
             ))}
@@ -57,7 +88,7 @@ export default function ResultsTable({ columns, rows }: Props) {
             <tr key={i}>
               {columns.map((c) => (
                 <td key={c} className={typeof row[c] === 'number' ? 'num' : ''}>
-                  {formatCell(row[c])}
+                  <Cell value={row[c]} />
                 </td>
               ))}
             </tr>
