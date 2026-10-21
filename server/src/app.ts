@@ -1,11 +1,13 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { z } from 'zod';
-import { HttpError } from './errors.js';
+import { askQuestion } from './ask.js';
+import { HttpError, isWriteBlocked } from './errors.js';
 import { explainResult } from './explain.js';
 import { getHealth } from './health.js';
 import { getLlm, PROVIDERS } from './llm/index.js';
 import { QUERY_TIMEOUT_MS, runRead } from './neo4j.js';
 import { findQuery, queries, type CatalogQuery } from './queries.js';
+import { getRingGraph } from './rings.js';
 
 const CustomerId = z.string().regex(/^C\d{3}$/, 'customerId must look like C001');
 
@@ -16,6 +18,11 @@ const RunBody = z.object({
 const ExplainBody = z.object({
   queryId: z.string(),
   params: z.record(z.string(), z.unknown()).default({}),
+  provider: z.enum(PROVIDERS).optional(),
+});
+
+const AskBody = z.object({
+  question: z.string().trim().min(3).max(500),
   provider: z.enum(PROVIDERS).optional(),
 });
 
@@ -48,7 +55,7 @@ export function createApp() {
   });
 
   app.get('/api/queries', (_req, res) => {
-    res.json(queries.map(({ id, title, description, params }) => ({ id, title, description, params })));
+    res.json(queries.map(({ id, title, description, params, cypher }) => ({ id, title, description, params, cypher: cypher.trim() })));
   });
 
   app.post('/api/queries/:id/run', async (req, res) => {
@@ -75,6 +82,18 @@ export function createApp() {
     res.json({ ...result, ...explained });
   });
 
+  app.post('/api/ask', async (req, res) => {
+    const body = AskBody.safeParse(req.body ?? {});
+    if (!body.success) {
+      throw new HttpError(400, 'Body must look like { "question": "...", "provider": "ollama" | "gemini" } (3 to 500 characters)');
+    }
+    res.json(await askQuestion(getLlm(body.data.provider), body.data.question));
+  });
+
+  app.get('/api/rings/graph', async (_req, res) => {
+    res.json(await getRingGraph());
+  });
+
   app.get('/api/customers', async (_req, res) => {
     const { rows } = await runRead(
       'MATCH (c:Customer) RETURN c.customerId AS id, c.name AS name ORDER BY id',
@@ -86,19 +105,21 @@ export function createApp() {
 
   // Every error becomes clean JSON. Details go to the server log, never to the client.
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    const { status, message } = toClientError(err);
+    const { status, message, extra } = toClientError(err);
     if (status >= 500) console.error('[api]', err);
-    res.status(status).json({ error: message });
+    res.status(status).json({ error: message, ...extra });
   });
 
   return app;
 }
 
-function toClientError(err: unknown): { status: number; message: string } {
-  if (err instanceof HttpError) return { status: err.status, message: err.message };
+function toClientError(err: unknown): { status: number; message: string; extra?: Record<string, unknown> } {
+  if (err instanceof HttpError) return { status: err.status, message: err.message, extra: err.extra };
 
   // Malformed JSON body from express.json()
   if (err instanceof SyntaxError && 'body' in err) return { status: 400, message: 'Request body is not valid JSON' };
+
+  if (isWriteBlocked(err)) return { status: 403, message: 'Rejected by Neo4j: this API only runs read-only queries' };
 
   const code = (err as { code?: string }).code ?? '';
   if (code.includes('TransactionTimedOut') || code.includes('Timeout')) {

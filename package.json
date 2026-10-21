@@ -2,11 +2,13 @@
   "name": "graph-insights",
   "private": true,
   "workspaces": [
-    "server"
+    "server",
+    "client"
   ],
   "scripts": {
-    "dev": "concurrently -n server -c blue \"npm run dev -w server\"",
-    "typecheck": "npm run typecheck -w server",
+    "dev": "concurrently -n server,client -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w client",
+    "build": "npm run build -w client",
     "test:queries": "npm run test:queries -w server"
   },
   "devDependencies": {
