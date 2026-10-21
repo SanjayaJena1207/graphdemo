@@ -1,0 +1,15 @@
+{
+  "name": "graph-insights",
+  "private": true,
+  "workspaces": [
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server -c blue \"npm run dev -w server\"",
+    "typecheck": "npm run typecheck -w server",
+    "test:queries": "npm run test:queries -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}
