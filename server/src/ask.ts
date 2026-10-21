@@ -1,4 +1,4 @@
-import { guardCypher } from './cypherGuard.js';
+import { guardCypher, relaxCustomerNameMatch } from './cypherGuard.js';
 import { HttpError, isCypherError } from './errors.js';
 import { explainResult } from './explain.js';
 import type { LlmClient } from './llm/index.js';
@@ -24,6 +24,9 @@ Relationships:
 const RULES = `Rules:
 - Read-only. Use only MATCH, OPTIONAL MATCH, WHERE, WITH, UNWIND, RETURN, ORDER BY, LIMIT.
 - Use only the labels, relationships and properties listed above.
+- People type partial names. To find a customer, product, brand or city from the question, use a
+  case-insensitive partial match, e.g. WHERE toLower(c.name) CONTAINS toLower('pooja').
+  Never use {name: '...'} for these. (Exact match is fine for the category names listed above.)
 - Name every returned column with AS.
 - Always end with LIMIT 50 or less.
 - Return only the Cypher. No explanation, no code fences.`;
@@ -63,7 +66,7 @@ async function writeCypher(llm: LlmClient, prompt: string): Promise<string> {
   const reply = await llm.generate({ system: SYSTEM_PROMPT, prompt });
   const guarded = guardCypher(reply);
   if (!guarded.ok) throw new HttpError(422, guarded.error, { cypher: guarded.cypher });
-  return guarded.cypher;
+  return relaxCustomerNameMatch(guarded.cypher);
 }
 
 export async function askQuestion(llm: LlmClient, question: string) {

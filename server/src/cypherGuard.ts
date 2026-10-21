@@ -39,6 +39,30 @@ export function ensureLimit(cypher: string): string {
   return cypher.slice(0, match.index) + `LIMIT ${MAX_LIMIT}`;
 }
 
+/**
+ * People type partial customer names ("Pooja" for "Pooja Hegde"), but LLMs often write an exact
+ * match. Rewrite exact customer-name matches into case-insensitive partial matches:
+ *   (c:Customer {name: 'Pooja'})  ->  (c:Customer WHERE toLower(c.name) CONTAINS toLower('Pooja'))
+ *   c.name = 'Pooja'              ->  toLower(c.name) CONTAINS toLower('Pooja')   (when c is a Customer)
+ * Only customer names: for products, "phone" would also match "Headphones".
+ */
+export function relaxCustomerNameMatch(cypher: string): string {
+  let counter = 0;
+  let result = cypher.replace(
+    /\((\w*)\s*:\s*Customer\s*\{\s*name\s*:\s*('[^']*'|"[^"]*")\s*\}\s*\)/g,
+    (_match, variable: string, literal: string) => {
+      const v = variable || `customer${++counter}`;
+      return `(${v}:Customer WHERE toLower(${v}.name) CONTAINS toLower(${literal}))`;
+    },
+  );
+
+  const customerVars = new Set([...result.matchAll(/\((\w+)\s*:\s*Customer\b/g)].map((m) => m[1]));
+  result = result.replace(/\b(\w+)\.name\s*=\s*('[^']*'|"[^"]*")/g, (match, variable: string, literal: string) =>
+    customerVars.has(variable) ? `toLower(${variable}.name) CONTAINS toLower(${literal})` : match,
+  );
+  return result;
+}
+
 export type GuardResult = { ok: true; cypher: string } | { ok: false; cypher: string; error: string };
 
 export function guardCypher(raw: string): GuardResult {

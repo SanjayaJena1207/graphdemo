@@ -39,7 +39,14 @@ export const gemini: LlmClient = {
           throw new HttpError(503, 'Gemini is overloaded right now, try again in a moment or switch to Ollama.');
         }
         if (err.status === 429) {
-          throw new HttpError(429, 'Gemini free-tier rate limit reached, try again in a minute or switch to Ollama.');
+          // Google's message names the quota that ran out; the daily one won't clear in a minute.
+          const daily = err.message.includes('PerDay');
+          throw new HttpError(
+            429,
+            daily
+              ? `Gemini free-tier daily quota for ${config.GEMINI_MODEL} is used up (it resets in about a day). Switch to Ollama, or set GEMINI_MODEL to another model in server/.env.`
+              : 'Gemini free-tier rate limit reached, try again in a minute or switch to Ollama.',
+          );
         }
         if (err.status === 400 || err.status === 401 || err.status === 403) {
           throw new HttpError(503, `Gemini rejected the request (HTTP ${err.status}). Check GEMINI_API_KEY and GEMINI_MODEL in server/.env.`);
