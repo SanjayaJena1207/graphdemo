@@ -1,5 +1,6 @@
 import { createApp } from './app.js';
 import { config } from './config.js';
+import { warmUpOllama } from './llm/ollama.js';
 import { closeNeo4j, verifyNeo4j } from './neo4j.js';
 
 async function main() {
@@ -13,6 +14,8 @@ async function main() {
         '*** Check NEO4J_URI / NEO4J_USERNAME / NEO4J_PASSWORD in server/.env and that the Aura instance is running.\n',
     );
   }
+
+  warmUpOllama();
 
   const server = createApp().listen(config.PORT, () => {
     console.log(`API listening on http://localhost:${config.PORT} (LLM provider: ${config.LLM_PROVIDER})`);

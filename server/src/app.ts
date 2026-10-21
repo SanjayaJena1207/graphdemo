@@ -1,24 +1,29 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { z } from 'zod';
+import { HttpError } from './errors.js';
+import { explainResult } from './explain.js';
 import { getHealth } from './health.js';
+import { getLlm, PROVIDERS } from './llm/index.js';
 import { QUERY_TIMEOUT_MS, runRead } from './neo4j.js';
 import { findQuery, queries, type CatalogQuery } from './queries.js';
-
-/** An error whose message is safe to show to the client. */
-export class HttpError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
-}
 
 const CustomerId = z.string().regex(/^C\d{3}$/, 'customerId must look like C001');
 
 const RunBody = z.object({
   params: z.record(z.string(), z.unknown()).default({}),
 });
+
+const ExplainBody = z.object({
+  queryId: z.string(),
+  params: z.record(z.string(), z.unknown()).default({}),
+  provider: z.enum(PROVIDERS).optional(),
+});
+
+function getQueryOr404(id: string): CatalogQuery {
+  const query = findQuery(id);
+  if (!query) throw new HttpError(404, `Unknown query "${id}"`);
+  return query;
+}
 
 /** Check the request params against what the catalog query declares. */
 export function validateParams(query: CatalogQuery, raw: Record<string, unknown>): Record<string, string> {
@@ -47,14 +52,27 @@ export function createApp() {
   });
 
   app.post('/api/queries/:id/run', async (req, res) => {
-    const query = findQuery(req.params.id);
-    if (!query) throw new HttpError(404, `Unknown query "${req.params.id}"`);
+    const query = getQueryOr404(req.params.id);
 
     const body = RunBody.safeParse(req.body ?? {});
     if (!body.success) throw new HttpError(400, 'Body must look like { "params": { ... } }');
 
     const params = validateParams(query, body.data.params);
     res.json(await runRead(query.cypher, params));
+  });
+
+  app.post('/api/explain', async (req, res) => {
+    const body = ExplainBody.safeParse(req.body ?? {});
+    if (!body.success) {
+      throw new HttpError(400, 'Body must look like { "queryId": "H3", "params": { ... }, "provider": "ollama" | "gemini" }');
+    }
+    const query = getQueryOr404(body.data.queryId);
+    const params = validateParams(query, body.data.params);
+
+    const result = await runRead(query.cypher, params);
+    const llm = getLlm(body.data.provider);
+    const explained = await explainResult(llm, query.title, query.description, result);
+    res.json({ ...result, ...explained });
   });
 
   app.get('/api/customers', async (_req, res) => {

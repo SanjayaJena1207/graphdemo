@@ -1,8 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { config } from './config.js';
+import type { Provider } from './llm/index.js';
 import { verifyNeo4j } from './neo4j.js';
-
-export type Provider = 'ollama' | 'gemini';
 
 export interface ProviderStatus {
   provider: Provider;
