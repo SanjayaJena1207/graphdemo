@@ -1,0 +1,23 @@
+address_id,line1,city,pincode
+A001,"16, Marine Drive",Chennai,441314
+A002,"71, Koramangala",Bengaluru,589601
+A003,"74, Banjara Hills",Mumbai,436467
+A004,"6, Banjara Hills",Hyderabad,551723
+A005,"11, Banjara Hills",Delhi,452954
+A006,"49, Koramangala",Pune,637718
+A007,"82, Baner",Kochi,485278
+A008,"48, Baner",Kolkata,509843
+A009,"86, Koramangala",Chennai,437436
+A010,"78, Park Street",Bengaluru,680044
+A011,"94, Banjara Hills",Mumbai,485670
+A012,"60, Marine Drive",Hyderabad,541531
+A013,"82, Banjara Hills",Delhi,570018
+A014,"99, MG Road",Pune,520088
+A015,"5, Baner",Kochi,610326
+A016,"35, Anna Nagar",Kolkata,510616
+A017,"73, Baner",Chennai,511478
+A018,"84, Salt Lake",Bengaluru,607426
+A019,"83, Salt Lake",Mumbai,474906
+A020,"34, Park Street",Hyderabad,529304
+A900,"Flat 4B, Tower 2, Sector 18",Delhi,110018
+A901,"Shop 12, Karol Bagh Market",Delhi,110005

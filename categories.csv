@@ -1,0 +1,13 @@
+category_id,name,parent_id
+CAT01,Electronics,
+CAT02,Mobiles,CAT01
+CAT03,Laptops,CAT01
+CAT04,Audio,CAT01
+CAT05,Home & Kitchen,
+CAT06,Kitchen Appliances,CAT05
+CAT07,Furniture,CAT05
+CAT08,Fashion,
+CAT09,Men's Clothing,CAT08
+CAT10,Footwear,CAT08
+CAT11,Books,
+CAT12,Fitness,

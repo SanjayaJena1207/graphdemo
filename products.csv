@@ -1,0 +1,37 @@
+product_id,name,brand,category_id,price
+P001,Galaxy S25,Samsung,CAT02,79999
+P002,iPhone 17,Apple,CAT02,89900
+P003,Redmi Note 15,Xiaomi,CAT02,18999
+P004,OnePlus 14,OnePlus,CAT02,64999
+P005,Phone Case,Spigen,CAT02,999
+P006,Screen Protector,Spigen,CAT02,499
+P007,MacBook Air M5,Apple,CAT03,114900
+P008,ThinkPad E14,Lenovo,CAT03,62990
+P009,Inspiron 15,Dell,CAT03,54990
+P010,Laptop Sleeve,AmazonBasics,CAT03,799
+P011,Wireless Mouse,Logitech,CAT03,1295
+P012,AirPods Pro 3,Apple,CAT04,24900
+P013,WH-1000XM6,Sony,CAT04,32990
+P014,Rockerz 450,boAt,CAT04,1499
+P015,Bluetooth Speaker,JBL,CAT04,4999
+P016,Mixer Grinder,Preethi,CAT06,4599
+P017,Air Fryer,Philips,CAT06,8999
+P018,Electric Kettle,Prestige,CAT06,1299
+P019,Induction Cooktop,Pigeon,CAT06,2199
+P020,Office Chair,Green Soul,CAT07,12499
+P021,Study Table,Nilkamal,CAT07,6999
+P022,Bookshelf,Nilkamal,CAT07,4499
+P023,Cotton Kurta,Fabindia,CAT09,1799
+P024,Denim Jeans,Levi's,CAT09,2999
+P025,Formal Shirt,Van Heusen,CAT09,1999
+P026,Running Shoes,Nike,CAT10,7495
+P027,Sneakers,Puma,CAT10,4999
+P028,Sandals,Bata,CAT10,1299
+P029,Atomic Habits,Penguin,CAT11,499
+P030,Designing Data-Intensive Applications,O'Reilly,CAT11,1899
+P031,Graph Databases,O'Reilly,CAT11,2299
+P032,The Psychology of Money,Jaico,CAT11,399
+P033,Yoga Mat,Boldfit,CAT12,899
+P034,Dumbbell Set,Kore,CAT12,2499
+P035,Fitness Band,Mi,CAT12,2999
+P036,Protein Powder,MuscleBlaze,CAT12,3299

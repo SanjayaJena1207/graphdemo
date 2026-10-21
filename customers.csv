@@ -1,0 +1,26 @@
+customer_id,name,email,city,signup_date
+C001,Aarav Sharma,aarav.sharma@example.com,Chennai,2025-03-03
+C002,Priya Nair,priya.nair@example.com,Bengaluru,2025-01-17
+C003,Rohan Iyer,rohan.iyer@example.com,Mumbai,2025-05-25
+C004,Ananya Reddy,ananya.reddy@example.com,Hyderabad,2025-05-10
+C005,Vikram Singh,vikram.singh@example.com,Delhi,2025-04-29
+C006,Kavya Menon,kavya.menon@example.com,Pune,2025-03-17
+C007,Arjun Rao,arjun.rao@example.com,Kochi,2025-02-26
+C008,Diya Patel,diya.patel@example.com,Kolkata,2025-10-11
+C009,Karthik Subramanian,karthik.subramanian@example.com,Chennai,2025-02-18
+C010,Meera Krishnan,meera.krishnan@example.com,Bengaluru,2025-08-09
+C011,Aditya Joshi,aditya.joshi@example.com,Mumbai,2025-01-21
+C012,Sneha Pillai,sneha.pillai@example.com,Hyderabad,2025-01-20
+C013,Rahul Gupta,rahul.gupta@example.com,Delhi,2025-02-21
+C014,Ishita Banerjee,ishita.banerjee@example.com,Pune,2025-04-26
+C015,Siddharth Das,siddharth.das@example.com,Kochi,2025-05-04
+C016,Pooja Hegde,pooja.hegde@example.com,Kolkata,2025-09-20
+C017,Nikhil Verma,nikhil.verma@example.com,Chennai,2025-01-18
+C018,Lakshmi Narayanan,lakshmi.narayanan@example.com,Bengaluru,2025-10-19
+C019,Farhan Qureshi,farhan.qureshi@example.com,Mumbai,2025-04-16
+C020,Neha Kulkarni,neha.kulkarni@example.com,Hyderabad,2025-10-11
+C021,Ravi Kumar,ravi.kumar21@tempmail.example,Delhi,2026-08-03
+C022,Suresh Babu,suresh.babu22@tempmail.example,Delhi,2026-08-04
+C023,Anil Mehta,anil.mehta23@tempmail.example,Delhi,2026-08-05
+C024,Deepak Yadav,deepak.yadav24@tempmail.example,Delhi,2026-08-06
+C025,Manoj Tiwari,manoj.tiwari25@tempmail.example,Delhi,2026-08-07
