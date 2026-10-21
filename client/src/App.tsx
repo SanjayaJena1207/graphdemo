@@ -5,6 +5,9 @@ import Header from './components/Header';
 import QueryCatalog from './components/QueryCatalog';
 import ResultsPanel, { type ResultView } from './components/ResultsPanel';
 
+const RETRY_ATTEMPTS = 20;
+const RETRY_DELAY_MS = 1500; // about 30 s in total
+
 export default function App() {
   const [health, setHealth] = useState<Health | null>(null);
   const [provider, setProvider] = useState<Provider>('ollama');
@@ -16,15 +19,35 @@ export default function App() {
   const [error, setError] = useState<ApiError | null>(null);
 
   useEffect(() => {
-    api.health().then(
-      (h) => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    // With "npm run dev" the client can be up before the API is listening,
+    // so keep retrying for a while instead of failing on the first try.
+    const load = async (attempt: number) => {
+      try {
+        const h = await api.health();
+        if (cancelled) return;
         setHealth(h);
         setProvider(h.llm.active); // start on the provider from server/.env
-      },
-      () => setError(new ApiError('Cannot reach the API server. Is "npm run dev" running?')),
-    );
-    api.queries().then(setQueries, setError);
-    api.customers().then(setCustomers, () => {}); // the dropdown falls back to C001
+        setError(null);
+        api.queries().then(setQueries, setError);
+        api.customers().then(setCustomers, () => {}); // the dropdown falls back to C001
+      } catch {
+        if (cancelled) return;
+        if (attempt < RETRY_ATTEMPTS) {
+          timer = setTimeout(() => load(attempt + 1), RETRY_DELAY_MS);
+        } else {
+          setError(new ApiError('Cannot reach the API server. Is "npm run dev" running?'));
+        }
+      }
+    };
+    load(1);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, []);
 
   const modelName = health?.llm.providers.find((p) => p.provider === provider)?.model ?? provider;
